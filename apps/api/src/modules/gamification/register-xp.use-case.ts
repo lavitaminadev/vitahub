@@ -23,6 +23,8 @@ export class RegisterXpUseCase {
     perfectNaming: boolean;
     hadDesignerErrorCorrection: boolean;
     delayJustification?: string;
+    description?: string;
+    metadata?: Record<string, any>;
   }) {
     return this.periodRepo.manager.transaction(async (manager: EntityManager) => {
       const now = new Date();
@@ -53,6 +55,8 @@ export class RegisterXpUseCase {
         pieceId: params.pieceId,
         eventType: XPEventType.BASE_DELIVERY,
         points,
+        description: params.description,
+        metadata: params.metadata,
       });
       await manager.save(XPEvent, event);
 

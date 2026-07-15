@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { api } from '../../core/api';
 
 export function SettingsPage() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState({ name: user?.name ?? '', email: user?.email ?? '' });
   const [orgName, setOrgName] = useState('');
 
@@ -54,7 +54,9 @@ export function SettingsPage() {
         )}
         <div className="settings-section">
           <h2>Sesión</h2>
-          <p style={{ color: '#666', fontSize: 14 }}>Token activo: {token ? `${token.slice(0, 20)}...` : 'No disponible'}</p>
+          <button className="btn btn-outline" onClick={() => { /* logout handled by auth store */ }}>
+            Cerrar sesión
+          </button>
         </div>
       </div>
     </div>

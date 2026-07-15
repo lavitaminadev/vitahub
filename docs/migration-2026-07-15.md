@@ -59,9 +59,56 @@
 - `docs/` — documentación existente
 - `skills/` — skills de opencode (no del proyecto)
 
+## Fase 5: Correcciones CRITICAL + HIGH (15-Jul 2026, tarde)
+
+### Backend — Relaciones TypeORM
+| Entidad | Relación agregada |
+|---------|------------------|
+| `Contract` | `@ManyToOne(() => Organization)`, `@ManyToOne(() => Client)` |
+| `Onboarding` | `@ManyToOne(() => Client)`, `@ManyToOne(() => Organization)`, `@ManyToOne(() => User)` (assignee) |
+| `Brief` | `@ManyToOne(() => Organization)`, `@ManyToOne(() => Client)` |
+| `Document` | `@ManyToOne(() => Organization)`, `@ManyToOne(() => Client)`, `@ManyToOne(() => User)` (uploader) |
+| `Notification` | `@Column(organization_id)`, `@ManyToOne(() => Organization)`, `@ManyToOne(() => User)` |
+
+### Backend — XP Consolidation
+- `XPService.registerDelivery/registerDesignerErrorPenalty` ahora delegan a `RegisterXpUseCase` (único punto de escritura)
+- `RegisterXpUseCase.executeDelivery` acepta `description` y `metadata` opcionales
+
+### Backend — Dead Code Removed
+- `apps/api/src/core/tenancy/tenancy.middleware.ts` — duplicado de `tenant.middleware.ts`
+- `apps/api/src/core/tenancy/base.entity.ts` — ninguna entidad lo extendía
+
+### Frontend — Error Boundary + Lazy Loading
+- Creado `ErrorBoundary` (class component) en `core/ErrorBoundary.tsx`
+- Envuelve toda la app en `App.tsx` → evita white screen en runtime errors
+- `router.tsx` migrado a `React.lazy()` + `Suspense` para todas las page components
+- Cada página se code-splittea en su propio chunk (de 0.5–4 kB c/u)
+- Creado `NotFoundPage` en `features/not-found/NotFoundPage.tsx` para ruta `*`
+
+### Frontend — PWA + SEO
+- `index.html`: `<html lang="es">`, título `VITAHUB`, meta tags description/OG/theme-color
+- `vite.config.ts`: PWA manifest corregido (`display: standalone`, `start_url: /`, `background_color`, icons 192x192 + 512x512 SVG)
+- Creados iconos PWA: `public/icon-192x192.svg`, `public/icon-512x512.svg`
+
+### Frontend — Security
+- `SettingsPage`: eliminado `token` del store → ya no se muestra JWT en UI
+
+### Frontend — Infra
+- Creado `apps/web/.env.example`
+
+### Infra
+- Creado `.dockerignore` en raíz
+
+### Builds verificados
+- `apps/api`: `npm run build` → OK (tsc)
+- `apps/web`: `npm run build` → OK (tsc + vite build, PWA generado)
+- `npm run test --workspace=apps/api` → **12 test files, 74 tests passed**
+
 ### Próximos pasos sugeridos
 1. Implementar contenido en `packages/shared/` (types ya existen)
-2. Implementar tests en `tests/`
-3. Agregar integraciones reales en los módulos backend vacíos
-4. Configurar Passenger en cPanel apuntando a la raíz del repo
-5. Servir el frontend compilado (`apps/web/dist/`) desde nginx/apache
+2. Agregar integraciones reales en los módulos backend vacíos
+3. Configurar Passenger en cPanel apuntando a la raíz del repo
+4. Servir frontend compilado (`apps/web/dist/`) desde nginx/apache
+5. Auditoría de dependencias (Dependabot)
+6. Agregar tests unitarios faltantes (billing, catalog, contracts, onboarding)
+7. Agregar páginas frontend para: billing, contracts, catalog, documents, knowledge, gamification
