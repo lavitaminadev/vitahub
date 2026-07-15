@@ -28,7 +28,7 @@ export function ProductionPage() {
   });
 
   const assignMutation = useMutation({
-    mutationFn: ({ id, assignee }: { id: string; assignee: string }) => api.put(`/production/pieces/${id}`, { assignee }),
+    mutationFn: ({ id, assignee }: { id: string; assignee: string }) => api.post(`/production/pieces/${id}/assign`, { designerId: assignee }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pieces'] });
       setAssignModal({ open: false, pieceId: '' });

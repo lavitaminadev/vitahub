@@ -5,10 +5,11 @@ import { IntegrationAccount } from './integration-account.entity';
 import { IntegrationsController } from './integrations.controller';
 import { CreateIntegrationUseCase } from './create-integration.use-case';
 import { ListIntegrationsUseCase } from './list-integrations.use-case';
+import { UpdateIntegrationUseCase } from './update-integration.use-case';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Integration, IntegrationAccount])],
   controllers: [IntegrationsController],
-  providers: [CreateIntegrationUseCase, ListIntegrationsUseCase],
+  providers: [CreateIntegrationUseCase, ListIntegrationsUseCase, UpdateIntegrationUseCase],
 })
 export class IntegrationsModule {}

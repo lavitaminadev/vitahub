@@ -39,6 +39,7 @@ import { MetaModule } from './modules/integrations/meta/meta.module';
 import { OAuthModule } from './modules/integrations/oauth/oauth.module';
 import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { OperationsModule } from './modules/operations/operations.module';
 
 const DB_HOST = process.env.DB_HOST || 'localhost';
 const DB_PORT = parseInt(process.env.DB_PORT || '3306', 10);
@@ -97,6 +98,7 @@ const DB_DATABASE = process.env.DB_DATABASE || 'vitahub';
     OAuthModule,
     KnowledgeModule,
     UploadsModule,
+    OperationsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

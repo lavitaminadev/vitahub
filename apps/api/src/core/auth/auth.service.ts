@@ -83,4 +83,9 @@ export class AuthService {
   async me(userId: string) {
     return this.userRepo.findOne({ where: { id: userId } });
   }
+
+  async updateProfile(userId: string, data: { name?: string; email?: string }) {
+    await this.userRepo.update(userId, data);
+    return this.userRepo.findOne({ where: { id: userId } });
+  }
 }

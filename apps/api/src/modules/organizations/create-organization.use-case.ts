@@ -13,4 +13,9 @@ export class CreateOrganizationUseCase {
     const org = this.repo.create(data);
     return this.repo.save(org);
   }
+
+  async executeUpdate(id: string, data: { name?: string; currency?: string }) {
+    await this.repo.update(id, data);
+    return this.repo.findOne({ where: { id } });
+  }
 }

@@ -19,7 +19,7 @@ export function ContentGridPage() {
 
   const { data: items, isLoading, error } = useQuery<ContentItem[]>({
     queryKey: ['content-grid', selectedMonth],
-    queryFn: () => api.get(`/content/grid?month=${selectedMonth}`),
+    queryFn: () => api.get(`/content/grids?month=${selectedMonth}`),
   });
 
   const grouped: Record<string, ContentItem[]> = {};

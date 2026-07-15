@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Put, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -50,5 +50,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
   async me(@CurrentUser() user: any) {
     return this.auth.me(user.id);
+  }
+
+  @Put('profile')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Actualizar perfil del usuario' })
+  async updateProfile(@CurrentUser() user: any, @Body() dto: { name?: string; email?: string }) {
+    return this.auth.updateProfile(user.id, dto);
   }
 }
