@@ -1,0 +1,30 @@
+{
+  "name": "vitahub",
+  "version": "1.0.0",
+  "description": "VITAHUB — Sistema de Gestión de Agencia",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build:api": "cd apps/api && npm run build",
+    "start:api": "cd apps/api && npm run start:prod",
+    "start:passenger": "node app.js",
+    "dev:api": "cd apps/api && npm run start:dev",
+    "dev:web": "cd apps/web && npm run dev",
+    "build:web": "cd apps/web && npm run build",
+    "lint:api": "cd apps/api && npm run lint",
+    "test:api": "cd apps/api && npm run test",
+    "migration:run": "cd apps/api && npx typeorm-ts-node-commonjs migration:run -d src/infrastructure/database-data-source.ts",
+    "migration:revert": "cd apps/api && npx typeorm-ts-node-commonjs migration:revert -d src/infrastructure/database-data-source.ts"
+  },
+  "workspaces": [
+    "apps/api",
+    "apps/web",
+    "packages/*"
+  ],
+  "dependencies": {
+    "lodash": "^4.18.1",
+    "rxjs": "^7.8.2"
+  }
+}
