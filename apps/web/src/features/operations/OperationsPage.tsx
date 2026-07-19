@@ -102,7 +102,7 @@ export function OperationsPage() {
                       <td>{m.currentPieces}</td>
                       <td>{m.capacity} UD</td>
                       <td>
-                        <div className="progress-bar" style={{ width: 100 }}>
+                        <div className="progress-bar" style={{ width: '100%' }}>
                           <div className="progress-fill" style={{ width: `${load}%`, background: load > 80 ? '#e74c3c' : '#27ae60' }} />
                         </div>
                         <span style={{ fontSize: 12, marginLeft: 8 }}>{load}%</span>

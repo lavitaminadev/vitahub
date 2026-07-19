@@ -18,6 +18,9 @@ export class Meeting {
   @JoinColumn({ name: 'organization_id' })
   organization: Organization;
 
+  @Column({ name: 'client_id', type: 'uuid', nullable: true })
+  clientId?: string;
+
   @Column({ type: 'varchar', length: 255 })
   title: string;
 

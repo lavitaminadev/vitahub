@@ -35,11 +35,15 @@ import { OnboardingModule } from './modules/onboarding/onboarding.module';
 import { BriefsModule } from './modules/briefs/briefs.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { DashboardsModule } from './modules/dashboards/dashboards.module';
+import { SupabaseModule } from './modules/supabase/supabase.module';
 import { MetaModule } from './modules/integrations/meta/meta.module';
+import { GoogleModule } from './modules/integrations/google/google.module';
 import { OAuthModule } from './modules/integrations/oauth/oauth.module';
 import { KnowledgeModule } from './modules/knowledge/knowledge.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { OperationsModule } from './modules/operations/operations.module';
+import { AudiovisualModule } from './modules/audiovisual/audiovisual.module';
+import { DataProtectionModule } from './core/data-protection/data-protection.module';
 
 const DB_HOST = process.env.DB_HOST || 'localhost';
 const DB_PORT = parseInt(process.env.DB_PORT || '3306', 10);
@@ -59,7 +63,7 @@ const DB_DATABASE = process.env.DB_DATABASE || 'vitahub';
       database: DB_DATABASE,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       migrations: [__dirname + '/infrastructure/migrations/*{.ts,.js}'],
-      synchronize: process.env.NODE_ENV === 'development',
+      synchronize: process.env.DB_SYNCHRONIZE === 'true',
       logging: process.env.NODE_ENV === 'development',
       extra: { charset: 'utf8mb4_unicode_ci' },
     }),
@@ -94,11 +98,15 @@ const DB_DATABASE = process.env.DB_DATABASE || 'vitahub';
     BriefsModule,
     DocumentsModule,
     DashboardsModule,
+    SupabaseModule,
     MetaModule,
+    GoogleModule,
     OAuthModule,
     KnowledgeModule,
     UploadsModule,
     OperationsModule,
+    AudiovisualModule,
+    DataProtectionModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

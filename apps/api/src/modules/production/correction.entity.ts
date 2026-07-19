@@ -13,6 +13,8 @@ export class Correction {
   @Column({ type: 'varchar', length: 50 }) origin: CorrectionOrigin;
   @Column({ type: 'text' }) description: string;
   @Column({ name: 'requested_by', type: 'uuid', nullable: true }) requestedBy?: string;
+  @Column({ name: 'billable_extra', type: 'boolean', default: false }) billableExtra: boolean;
+  @Column({ name: 'charge_note_required', type: 'boolean', default: false }) chargeNoteRequired: boolean;
   @Column({ name: 'resolved_by', type: 'uuid', nullable: true }) resolvedBy?: string;
   @Column({ name: 'resolved_at', type: 'timestamp', nullable: true }) resolvedAt?: Date;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;

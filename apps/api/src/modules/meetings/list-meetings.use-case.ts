@@ -9,9 +9,10 @@ export class ListMeetingsUseCase {
     @InjectRepository(Meeting) private repo: Repository<Meeting>,
   ) {}
 
-  async execute(organizationId: string, type?: string) {
+  async execute(organizationId: string, type?: string, clientId?: string) {
     const where: any = { organizationId };
     if (type) where.type = type;
+    if (clientId) where.clientId = clientId;
     return this.repo.find({ where, order: { scheduledAt: 'DESC' } });
   }
 }

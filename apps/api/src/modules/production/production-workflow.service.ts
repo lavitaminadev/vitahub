@@ -67,6 +67,7 @@ export class ProductionWorkflowService {
     await this.pieceRepo.manager.transaction(async (manager) => {
       piece.clientCorrectionCount = (piece.clientCorrectionCount ?? 0) + 1;
       piece.correctionCount = (piece.correctionCount ?? 0) + 1;
+      const shouldGenerateChargeNote = piece.clientCorrectionCount > 3;
 
       const correction = manager.create(Correction, {
         pieceId: piece.id,
@@ -74,6 +75,8 @@ export class ProductionWorkflowService {
         origin: CorrectionOrigin.CLIENT_REQUEST,
         description: comment,
         requestedBy: clientUserId,
+        billableExtra: shouldGenerateChargeNote,
+        chargeNoteRequired: shouldGenerateChargeNote,
       });
       await manager.save(Correction, correction);
 
@@ -108,6 +111,8 @@ export class ProductionWorkflowService {
         origin: CorrectionOrigin.DESIGNER_ERROR,
         description,
         requestedBy: artDirectorId,
+        billableExtra: false,
+        chargeNoteRequired: false,
       });
       await manager.save(Correction, correction);
 

@@ -1,7 +1,37 @@
-export type PieceStatus = 'backlog' | 'assigned' | 'in_progress' | 'internal_review' | 'client_validation' | 'correction' | 'approved' | 'delivered'
+/**
+ * @fileoverview Production piece domain types.
+ */
 
-export type PieceType = 'post_simple' | 'post_author' | 'carousel' | 'story_original' | 'story_adapted' | 'story_template' | 'reel_cover' | 'flyer_digital' | 'flyer_print'
+/**
+ * Possible states of a creative piece through the production workflow.
+ */
+export type PieceStatus =
+  | 'backlog'
+  | 'assigned'
+  | 'in_progress'
+  | 'internal_review'
+  | 'client_validation'
+  | 'correction'
+  | 'approved'
+  | 'delivered'
 
+/**
+ * Supported creative piece formats.
+ */
+export type PieceType =
+  | 'post_simple'
+  | 'post_author'
+  | 'carousel'
+  | 'story_original'
+  | 'story_adapted'
+  | 'story_template'
+  | 'reel_cover'
+  | 'flyer_digital'
+  | 'flyer_print'
+
+/**
+ * Piece response returned by production endpoints.
+ */
 export interface PieceResponse {
   id: string
   organizationId: string
@@ -19,6 +49,9 @@ export interface PieceResponse {
   createdAt: Date
 }
 
+/**
+ * A submitted version of a piece.
+ */
 export interface PieceVersionResponse {
   id: string
   pieceId: string

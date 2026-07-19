@@ -1,5 +1,6 @@
-# VITAHUB Deploy Script for Windows / iHosting
-# Usage: .\infrastructure\ihosting\deploy.ps1 [-Environment <string>]
+# Legacy Docker deploy script.
+# Produccion en iHosting usa cPanel Git deployment + Passenger.
+# Este archivo se conserva solo como referencia para escenarios no cPanel.
 
 param(
     [Parameter(Position = 0)]
@@ -10,7 +11,7 @@ $ErrorActionPreference = "Stop"
 $COMPOSE_FILE = "infrastructure/docker-compose.yml"
 $ENV_FILE = ".env.$Environment"
 
-Write-Host "Deploying VITAHUB to $Environment..." -ForegroundColor Cyan
+Write-Host "Legacy Docker deploy path for $Environment..." -ForegroundColor Yellow
 
 # Pull latest
 git pull origin main
@@ -30,4 +31,4 @@ if (-not $?) { throw "migrations failed" }
 # Clean old images
 docker image prune -f
 
-Write-Host "Deploy complete" -ForegroundColor Green
+Write-Host "Legacy Docker deploy complete" -ForegroundColor Green

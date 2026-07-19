@@ -8,6 +8,7 @@ import { Piece } from '../production/piece.entity';
 import { Client } from '../clients/client.entity';
 import { ParameterResolver } from '../../core/parameters/parameter-resolver.service';
 import { calculatePieceUd } from './ud-calculator';
+import { BudgetAlertDto } from './dto/budget-alert.dto';
 
 @Injectable()
 export class DesignBudgetService {
@@ -44,6 +45,12 @@ export class DesignBudgetService {
       const budget = await this.ensureMonthlyBudget(piece.clientId, year, month);
       const amount = piece.udAmount;
 
+      const used = Number(budget.reserved) + Number(budget.consumed);
+      const available = Number(budget.contracted) - used;
+      if (amount > available) {
+        throw new Error(`UD insuficientes. Disponibles: ${available}, requeridas: ${amount}`);
+      }
+
       budget.reserved = Number(budget.reserved) + amount;
       await manager.save(UDBudget, budget);
 
@@ -67,7 +74,11 @@ export class DesignBudgetService {
       const budget = await this.ensureMonthlyBudget(piece.clientId, year, month);
       const amount = piece.udAmount;
 
-      budget.reserved = Math.max(0, Number(budget.reserved) - amount);
+      if (amount > Number(budget.reserved)) {
+        throw new Error(`UD reservadas insuficientes para confirmar. Reservadas: ${budget.reserved}, a consumir: ${amount}`);
+      }
+
+      budget.reserved = Number(budget.reserved) - amount;
       budget.consumed = Number(budget.consumed) + amount;
       await manager.save(UDBudget, budget);
 
@@ -91,6 +102,26 @@ export class DesignBudgetService {
     if (total <= 0) return false;
 
     return (used / total) >= (threshold / 100);
+  }
+
+  async checkBudgetAlert(clientId: string, clientName?: string): Promise<BudgetAlertDto> {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth() + 1;
+    const budget = await this.ensureMonthlyBudget(clientId, year, month);
+
+    const used = Number(budget.reserved) + Number(budget.consumed);
+    const total = Number(budget.contracted);
+    const percentage = total > 0 ? Math.round((used / total) * 100) : 0;
+
+    let status: BudgetAlertDto['status'] = 'ok';
+    if (used >= total) {
+      status = 'blocked';
+    } else if (percentage >= 80) {
+      status = 'warning';
+    }
+
+    return { clientId, clientName, used, total, percentage, status };
   }
 
   private async resolveMonthlyBudget(clientId: string): Promise<number> {

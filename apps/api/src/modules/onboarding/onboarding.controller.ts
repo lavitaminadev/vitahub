@@ -1,6 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Req, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OnboardingService } from './onboarding.service';
+import { CreateOnboardingDto } from './dto/create-onboarding.dto';
+import { UpdateOnboardingDto } from './dto/update-onboarding.dto';
+import { PaginationDto } from '../../shared/dto/pagination.dto';
+import { Roles } from '../../core/authorization/roles.decorator';
+import { UserRole } from '../organizations/user-role.enum';
+import type { AuthenticatedRequest } from '@shared/types/request';
 
 @Controller('onboarding')
 @UseGuards(AuthGuard('jwt'))
@@ -8,27 +14,36 @@ export class OnboardingController {
   constructor(private service: OnboardingService) {}
 
   @Post()
-  create(@Body() dto: any, @Req() req: any) {
+  @Roles(UserRole.OPERATIONS_DIRECTOR, UserRole.ADMIN)
+  create(@Body() dto: CreateOnboardingDto, @Req() req: AuthenticatedRequest) {
     return this.service.create(dto, req.organizationId);
   }
 
+  @Post('templates/standard')
+  @Roles(UserRole.OPERATIONS_DIRECTOR, UserRole.ADMIN)
+  createStandardChecklist(@Body() dto: { clientId: string }, @Req() req: AuthenticatedRequest) {
+    return this.service.createStandardChecklist(dto.clientId, req.organizationId);
+  }
+
   @Get()
-  findAll(@Req() req: any) {
-    return this.service.findAll(req.organizationId);
+  findAll(@Query() query: PaginationDto, @Req() req: AuthenticatedRequest) {
+    return this.service.findAll(req.organizationId, query.limit, query.offset);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() req: any) {
+  findOne(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     return this.service.findOne(id, req.organizationId);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
+  @Roles(UserRole.OPERATIONS_DIRECTOR, UserRole.ADMIN)
+  update(@Param('id') id: string, @Body() dto: UpdateOnboardingDto, @Req() req: AuthenticatedRequest) {
     return this.service.update(id, dto, req.organizationId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() req: any) {
+  @Roles(UserRole.ADMIN)
+  remove(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
     return this.service.remove(id, req.organizationId);
   }
 }

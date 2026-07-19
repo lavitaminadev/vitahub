@@ -14,7 +14,7 @@ export const dataSourceOptions: DataSourceOptions = {
   database: DB_DATABASE,
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
-  synchronize: process.env.NODE_ENV === 'development',
+  synchronize: process.env.DB_SYNCHRONIZE === 'true',
   logging: process.env.NODE_ENV === 'development',
   extra: {
     charset: 'utf8mb4_unicode_ci',

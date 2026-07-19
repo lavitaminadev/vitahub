@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Lead } from '../lead.entity';
+import { LeadIntakeService } from '../lead-intake.service';
 
 @Injectable()
 export class CreateLeadUseCase {
   constructor(
-    @InjectRepository(Lead) private repo: Repository<Lead>,
+    private readonly leadIntake: LeadIntakeService,
   ) {}
 
   async execute(data: {
@@ -16,9 +14,9 @@ export class CreateLeadUseCase {
     phone?: string;
     company?: string;
     source?: string;
+    sourceDetail?: string;
     notes?: string;
   }) {
-    const lead = this.repo.create(data);
-    return this.repo.save(lead);
+    return this.leadIntake.captureLead(data);
   }
 }

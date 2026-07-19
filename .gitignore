@@ -21,3 +21,6 @@ skills/
 .idea/
 *.swp
 *.swo
+
+# Informes de Auditoria
+docs/auditoria-entrega/

@@ -1,5 +1,5 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn,
+  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, BeforeInsert, BeforeUpdate,
 } from 'typeorm';
 import { Organization } from '../organizations/organization.entity';
 import { UserRole } from '../organizations/user-role.enum';
@@ -37,6 +37,9 @@ export class User {
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ name: 'client_id', type: 'uuid', nullable: true })
+  clientId?: string;
+
   @Column({ name: 'refresh_token', type: 'text', nullable: true, select: false })
   refreshToken?: string;
 
@@ -45,4 +48,12 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  normalize(): void {
+    this.name = this.name?.trim();
+    this.email = this.email?.trim().toLowerCase();
+    this.phone = this.phone?.replace(/[^\d+]/g, '') || undefined;
+  }
 }

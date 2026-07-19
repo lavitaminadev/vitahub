@@ -1,36 +1,36 @@
-import { useState } from 'react';
+/**
+ * @fileoverview Application layout with responsive sidebar and role-based
+ * navigation.
+ */
+
+import { useCallback, useMemo, useState, type JSX } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../core/auth';
+import { getNavigation } from '../core/navigation.registry';
+import { NotificationBell } from '../features/notifications/NotificationBell';
 
-interface NavItem {
-  label: string;
-  path: string;
-  icon: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: '📊' },
-  { label: 'Clientes', path: '/clients', icon: '👥' },
-  { label: 'Leads CRM', path: '/crm/leads', icon: '🎯' },
-  { label: 'Producción', path: '/production', icon: '🎨' },
-  { label: 'Contenido', path: '/content', icon: '📝' },
-  { label: 'Aprobaciones', path: '/approvals', icon: '✅' },
-  { label: 'Reuniones', path: '/meetings', icon: '📅' },
-  { label: 'Reportes', path: '/reports', icon: '📈' },
-  { label: 'Operaciones', path: '/operations', icon: '⚙️' },
-  { label: 'Dirección', path: '/direction', icon: '🎯' },
-  { label: 'Integraciones', path: '/integrations', icon: '🔗' },
-  { label: 'Configuración', path: '/settings', icon: '⚙️' },
-];
-
-export function Layout() {
+/**
+ * Main layout shell rendered for authenticated users.
+ *
+ * Responsibilities:
+ * - Render responsive sidebar.
+ * - Filter navigation by user role.
+ * - Provide an outlet for nested routes.
+ */
+export function Layout(): JSX.Element {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Compute navigation once per role change to avoid filtering on every render.
+  const navItems = useMemo(() => getNavigation(user?.role), [user?.role]);
+
+  const toggleSidebar = useCallback(() => setSidebarOpen((open) => !open), []);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+
   return (
     <div className="app-layout">
-      <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+      <button className="sidebar-toggle" onClick={toggleSidebar} aria-label="Toggle sidebar">
         ☰
       </button>
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -38,14 +38,14 @@ export function Layout() {
           <h2>VITAHUB</h2>
         </div>
         <nav className="sidebar-nav">
-          {NAV_ITEMS.map((item) => {
-            const active = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+          {navItems.map((item) => {
+            const active = location.pathname === item.path || location.pathname.startsWith(`${item.path}/`);
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`nav-item ${active ? 'active' : ''}`}
-                onClick={() => setSidebarOpen(false)}
+                onClick={closeSidebar}
               >
                 <span className="nav-icon">{item.icon}</span>
                 <span className="nav-label">{item.label}</span>
@@ -54,6 +54,9 @@ export function Layout() {
           })}
         </nav>
         <div className="sidebar-footer">
+          <div className="sidebar-footer-actions">
+            <NotificationBell />
+          </div>
           <div className="user-info">
             <div className="user-name">{user?.name}</div>
             <div className="user-role">{user?.role}</div>
@@ -63,7 +66,7 @@ export function Layout() {
           </button>
         </div>
       </aside>
-      <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+      <div className="sidebar-backdrop" onClick={closeSidebar} />
       <main className="main-content">
         <Outlet />
       </main>

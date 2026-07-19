@@ -1,0 +1,11 @@
+---
+deployment:
+  tasks:
+    - export APP_ROOT=$PWD
+    - export DEPLOYPATH=$HOME/public_html
+    - /bin/mkdir -p "$DEPLOYPATH"
+    - npm ci
+    - npm run build:cpanel
+    - /bin/rm -rf "$DEPLOYPATH/assets"
+    - /bin/cp -R apps/web/dist/. "$DEPLOYPATH"
+    - /bin/touch "$APP_ROOT/app.js"

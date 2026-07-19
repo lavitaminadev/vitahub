@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Organization and settings domain types.
+ */
+
+/**
+ * Organization-level configuration.
+ */
 export interface OrganizationSettings {
   timezone?: string
   currency?: string
@@ -6,6 +13,9 @@ export interface OrganizationSettings {
   retentionPolicyDays?: number
 }
 
+/**
+ * Organization response returned by organization endpoints.
+ */
 export interface OrganizationResponse {
   id: string
   name: string

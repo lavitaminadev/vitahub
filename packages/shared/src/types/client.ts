@@ -1,5 +1,15 @@
+/**
+ * @fileoverview Client domain types.
+ */
+
+/**
+ * Lifecycle status of a client.
+ */
 export type ClientStatus = 'onboarding' | 'active' | 'paused' | 'at_risk' | 'churned'
 
+/**
+ * Client response returned by client management endpoints.
+ */
 export interface ClientResponse {
   id: string
   organizationId: string
@@ -17,6 +27,9 @@ export interface ClientResponse {
   createdAt: Date
 }
 
+/**
+ * Payload to create a new client.
+ */
 export interface CreateClientRequest {
   name: string
   legalName?: string

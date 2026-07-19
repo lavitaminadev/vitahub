@@ -6,13 +6,22 @@ import { Client } from '../../modules/clients/client.entity';
 import { UDBudget } from '../../modules/design-budget/ud-budget.entity';
 import { Piece } from '../../modules/production/piece.entity';
 import { Notification } from '../notifications/notification.entity';
+import { Invoice } from '../../modules/billing/invoice.entity';
+import { EmailModule } from '../notifications/email.module';
 import { CloseXpPeriodsJob } from './cron/close-xp-periods.job';
 import { CreateMonthlyCyclesJob } from './cron/create-monthly-cycles.job';
 import { DetectStalePiecesJob } from './cron/detect-stale-pieces.job';
+import { CollectionEmailsJob } from './cron/collection-emails.job';
+import { PurgeExpiredLeadsJob } from './cron/purge-expired-leads.job';
+import { MetaLeadRecoveryJob } from './cron/meta-lead-recovery.job';
+import { Lead } from '../../modules/crm/leads/lead.entity';
+import { IntegrationAccount } from '../../modules/integrations/integration-account.entity';
+import { DataProtectionModule } from '../data-protection/data-protection.module';
+import { MetaModule } from '../../modules/integrations/meta/meta.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([XPPeriod, XPEvent, Client, UDBudget, Piece, Notification])],
-  providers: [CloseXpPeriodsJob, CreateMonthlyCyclesJob, DetectStalePiecesJob],
-  exports: [CloseXpPeriodsJob, CreateMonthlyCyclesJob, DetectStalePiecesJob],
+  imports: [TypeOrmModule.forFeature([XPPeriod, XPEvent, Client, UDBudget, Piece, Notification, Invoice, Lead, IntegrationAccount]), EmailModule, DataProtectionModule, MetaModule],
+  providers: [CloseXpPeriodsJob, CreateMonthlyCyclesJob, DetectStalePiecesJob, CollectionEmailsJob, PurgeExpiredLeadsJob, MetaLeadRecoveryJob],
+  exports: [CloseXpPeriodsJob, CreateMonthlyCyclesJob, DetectStalePiecesJob, CollectionEmailsJob, PurgeExpiredLeadsJob, MetaLeadRecoveryJob],
 })
 export class JobsModule {}

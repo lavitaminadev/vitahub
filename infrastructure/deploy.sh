@@ -1,5 +1,6 @@
 #!/bin/bash
-# VITAHUB Deploy Script
+# Legacy Docker deploy script.
+# Produccion en iHosting usa cPanel Git deployment + Passenger.
 # Usage: ./infrastructure/deploy.sh [environment]
 
 set -e
@@ -7,7 +8,7 @@ set -e
 ENV=${1:-production}
 COMPOSE_FILE="infrastructure/docker-compose.yml"
 
-echo "🚀 Deploying VITAHUB to $ENV..."
+echo "Legacy Docker deploy path to $ENV..."
 
 # Pull latest
 git pull origin main
@@ -22,4 +23,4 @@ docker-compose -f $COMPOSE_FILE exec api npm run migration:run
 # Clean old images
 docker image prune -f
 
-echo "✅ Deploy complete"
+echo "Legacy Docker deploy complete"

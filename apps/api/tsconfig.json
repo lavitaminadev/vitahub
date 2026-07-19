@@ -15,15 +15,15 @@
     "strictNullChecks": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
+    "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@core/*": ["./src/core/*"],
-      "@modules/*": ["./src/modules/*"],
-      "@shared/*": ["./src/shared/*"]
+      "@/*": ["./*"],
+      "@core/*": ["./core/*"],
+      "@modules/*": ["./modules/*"],
+      "@shared/*": ["./shared/*"]
     }
   },
   "include": ["src/**/*"],

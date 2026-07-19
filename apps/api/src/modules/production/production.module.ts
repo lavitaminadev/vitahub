@@ -9,14 +9,16 @@ import { SubmitVersionUseCase } from './submit-version.use-case';
 import { RejectPieceUseCase } from './reject-piece.use-case';
 import { DeliverPieceUseCase } from './deliver-piece.use-case';
 import { ListPiecesUseCase } from './list-pieces.use-case';
+import { PieceRulesService } from './piece-rules.service';
 import { ProductionWorkflowService } from './production-workflow.service';
 import { DesignBudgetModule } from '../design-budget/design-budget.module';
 import { GamificationModule } from '../gamification/gamification.module';
+import { ApprovalRequest } from '../approvals/approval-request.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Piece, PieceVersion, Correction]), DesignBudgetModule, GamificationModule],
+  imports: [TypeOrmModule.forFeature([Piece, PieceVersion, Correction, ApprovalRequest]), DesignBudgetModule, GamificationModule],
   controllers: [ProductionController],
-  providers: [AssignPieceUseCase, SubmitVersionUseCase, RejectPieceUseCase, DeliverPieceUseCase, ListPiecesUseCase, ProductionWorkflowService],
+  providers: [AssignPieceUseCase, SubmitVersionUseCase, RejectPieceUseCase, DeliverPieceUseCase, ListPiecesUseCase, ProductionWorkflowService, PieceRulesService],
   exports: [TypeOrmModule],
 })
 export class ProductionModule {}

@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Public barrel export for `@vitahub/shared`.
+ *
+ * Import from this package in both `apps/api` and `apps/web` to share domain
+ * contracts, constants, and runtime arrays.
+ */
+
 export * from './types/common'
 export * from './types/auth'
 export * from './types/user'

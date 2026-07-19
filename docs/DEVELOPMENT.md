@@ -17,9 +17,8 @@ cd hubvit
 # 2. Usar versión correcta de Node
 nvm use
 
-# 3. Instalar dependencias
-npm install
-cd apps/api && npm install && cd ../..
+# 3. Instalar todos los workspaces desde el lockfile raíz
+npm ci
 
 # 4. Configurar variables de entorno
 cp .env.example .env
@@ -130,3 +129,26 @@ chore: tareas de mantenimiento
 docs: cambios en documentación
 refactor: refactorización de código
 ```
+## Variables adicionales para integraciones
+
+| Variable | Default | DescripciÃ³n |
+|---------|---------|-------------|
+| `META_APP_ID` | - | App ID de Meta |
+| `META_APP_SECRET` | - | App Secret de Meta |
+| `META_GRAPH_API_VERSION` | `v23.0` | VersiÃ³n del Graph API de Meta |
+| `META_WEBHOOK_VERIFY_TOKEN` | - | Token de verificaciÃ³n del webhook |
+| `META_TEST_EVENT_CODE` | - | Codigo de Test Events para validar Conversions API sin afectar datos reales |
+| `META_CONVERSIONS_ACCESS_TOKEN` | - | Token dedicado de CAPI en el servidor; nunca se envia al navegador |
+| `API_PUBLIC_URL` | - | URL HTTPS publica de la API, incluida la base `/api` |
+| `INTEGRATION_ENCRYPTION_KEY` | - | Clave de 32 bytes en base64 o 64 caracteres hex; obligatoria en produccion |
+| `OAUTH_STATE_SECRET` | - | Secreto para vincular y expirar callbacks OAuth; si falta usa `JWT_SECRET` |
+| `CRM_LEAD_RETENTION_DAYS` | - | Dias hasta revisar/anonimizar leads segun politica aprobada |
+| `GOOGLE_CLIENT_ID` | - | Client ID de Google |
+| `GOOGLE_CLIENT_SECRET` | - | Client Secret de Google |
+| `VITE_API_URL` | `/api` | Base URL del frontend hacia la API |
+
+## Flujos operativos relevantes
+
+- Meta: `/integrations` solicita la URL OAuth al backend, abre popup y `/integrations/meta/callback` persiste la integraciÃ³n real en la tabla `integrations`.
+- Google: `/integrations/google/auth-url` abre OAuth y `/integrations/google/callback` guarda access token y refresh token reales en base de datos.
+- Documentos: `/documents` ya opera con la API real para listar, crear, editar y eliminar documentos; la creaciÃ³n requiere `clientId`.

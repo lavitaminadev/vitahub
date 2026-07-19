@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
 import { Organization } from '../../organizations/organization.entity';
 
 @Entity('leads')
@@ -11,11 +11,36 @@ export class Lead {
   @Column({ type: 'varchar', length: 20, nullable: true }) phone?: string;
   @Column({ type: 'varchar', length: 255, nullable: true }) company?: string;
   @Column({ type: 'varchar', length: 255, nullable: true }) source?: string;
+  @Column({ name: 'source_detail', type: 'varchar', length: 255, nullable: true }) sourceDetail?: string;
+  @Column({ name: 'external_lead_id', type: 'varchar', length: 255, nullable: true }) externalLeadId?: string;
+  @Column({ name: 'external_form_id', type: 'varchar', length: 255, nullable: true }) externalFormId?: string;
+  @Column({ name: 'external_campaign_id', type: 'varchar', length: 255, nullable: true }) externalCampaignId?: string;
+  @Column({ name: 'campaign_name', type: 'varchar', length: 255, nullable: true }) campaignName?: string;
+  @Column({ name: 'page_id', type: 'varchar', length: 255, nullable: true }) pageId?: string;
   @Column({ type: 'varchar', length: 50, default: 'new' }) status: string;
+  @Column({ name: 'fit_status', type: 'varchar', length: 50, default: 'review' }) fitStatus: string;
+  @Column({ name: 'quality_score', type: 'int', default: 0 }) qualityScore: number;
+  @Column({ name: 'discard_reason', type: 'text', nullable: true }) discardReason?: string;
   @Column({ name: 'assigned_to', type: 'uuid', nullable: true }) assignedTo?: string;
   @Column({ type: 'text', nullable: true }) notes?: string;
+  @Column({ name: 'consent_captured_at', type: 'timestamp', nullable: true }) consentCapturedAt?: Date;
+  @Column({ name: 'retention_review_at', type: 'timestamp', nullable: true }) retentionReviewAt?: Date;
+  @Column({ type: 'json', nullable: true }) metadata?: Record<string, any>;
   @Column({ name: 'converted_at', type: 'timestamp', nullable: true }) convertedAt?: Date;
   @Column({ name: 'converted_to_client_id', type: 'uuid', nullable: true }) convertedToClientId?: string;
   @CreateDateColumn({ name: 'created_at' }) createdAt: Date;
   @UpdateDateColumn({ name: 'updated_at' }) updatedAt: Date;
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  normalize(): void {
+    this.name = this.name?.trim();
+    this.email = this.email?.trim().toLowerCase() || undefined;
+    this.phone = this.phone?.replace(/[^\d+]/g, '') || undefined;
+    this.company = this.company?.trim() || undefined;
+    this.source = this.source?.trim() || undefined;
+    this.sourceDetail = this.sourceDetail?.trim() || undefined;
+    this.campaignName = this.campaignName?.trim() || undefined;
+    this.notes = this.notes?.trim() || undefined;
+  }
 }

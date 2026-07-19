@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Integration } from './integration.entity';
 import { IntegrationProvider } from './integration-provider.enum';
+import { assertConfigHasNoSecrets, toIntegrationResponse } from './integration-response';
 
 @Injectable()
 export class CreateIntegrationUseCase {
@@ -11,7 +12,13 @@ export class CreateIntegrationUseCase {
   ) {}
 
   async execute(data: { organizationId: string; provider: IntegrationProvider; name: string; config?: Record<string, any> }) {
-    const integration = this.repo.create(data as any);
-    return this.repo.save(integration);
+    assertConfigHasNoSecrets(data.config);
+    const integration = this.repo.create({
+      organizationId: data.organizationId,
+      provider: data.provider,
+      name: data.name,
+      config: data.config,
+    });
+    return toIntegrationResponse(await this.repo.save(integration));
   }
 }

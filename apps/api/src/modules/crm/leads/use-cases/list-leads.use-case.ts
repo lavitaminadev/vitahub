@@ -9,9 +9,10 @@ export class ListLeadsUseCase {
     @InjectRepository(Lead) private repo: Repository<Lead>,
   ) {}
 
-  async execute(organizationId: string, status?: string) {
+  async execute(organizationId: string, status?: string, fitStatus?: string) {
     const where: any = { organizationId };
     if (status) where.status = status;
+    if (fitStatus) where.fitStatus = fitStatus;
     return this.repo.find({ where, order: { createdAt: 'DESC' } });
   }
 }

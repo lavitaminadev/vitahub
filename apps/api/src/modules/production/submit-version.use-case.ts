@@ -14,13 +14,14 @@ export class SubmitVersionUseCase {
   ) {}
 
   async execute(pieceId: string, data: { fileName: string; driveFileId?: string; userId: string }) {
-    const piece = await this.pieceRepo.findOne({ where: { id: pieceId } });
+    const piece = await this.pieceRepo.findOne({ where: { id: pieceId }, relations: ['client'] });
     if (!piece) throw new NotFoundException('Pieza no encontrada');
 
     const versions = await this.versionRepo.find({ where: { pieceId }, order: { versionNumber: 'DESC' }, take: 1 });
     const nextVersion = (versions[0]?.versionNumber ?? 0) + 1;
 
-    const namingResult = validate(data.fileName, '');
+    const clientCode = piece?.client?.name?.substring(0, 4).toUpperCase() || '';
+    const namingResult = validate(data.fileName, clientCode);
     const state = extractState(data.fileName);
 
     const version = this.versionRepo.create({

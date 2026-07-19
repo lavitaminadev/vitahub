@@ -19,6 +19,6 @@ import { RequestIdMiddleware } from './request-id.middleware';
 })
 export class ErrorsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RequestIdMiddleware).forRoutes('*');
+    consumer.apply(RequestIdMiddleware).forRoutes('{*splat}');
   }
 }

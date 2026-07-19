@@ -194,3 +194,27 @@ docker-compose -f infrastructure/monitoring/docker-compose.monitoring.yml up -d
 - **Production Workflow** — Assign → Submit → Reject → Deliver (transactional with events)
 - **Monthly UD Budget** — Reserve → Consume, non-cumulative
 - **Multi-tenancy** — All entities scoped by organizationId with automatic middleware filtering
+## Integration Notes
+
+- Meta OAuth now uses the backend endpoint `/integrations/meta/auth-url`, persists the callback from `/integrations/meta/callback`, and stores the long-lived token in `integrations.config`.
+- Google OAuth now uses `/integrations/google/auth-url`, persists the callback from `/integrations/google/callback`, and stores both access token and refresh token in `integrations.config`.
+- The integration cards refresh credentials through `/integrations/meta/:id/refresh` and `/integrations/google/:id/refresh`, so the UI no longer depends on placeholder actions.
+- The documents module now performs real CRUD against `/documents`, including client selection, status, file URL, Drive file id, and tags.
+
+## Extra Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| META_APP_ID | Meta app client id | â€” |
+| META_APP_SECRET | Meta app client secret | â€” |
+| META_GRAPH_API_VERSION | Meta Graph API version | v23.0 |
+| META_WEBHOOK_VERIFY_TOKEN | Meta webhook verification token | â€” |
+| GOOGLE_CLIENT_ID | Google OAuth client id | â€” |
+| GOOGLE_CLIENT_SECRET | Google OAuth client secret | â€” |
+| META_TEST_EVENT_CODE | Meta Events Manager test code | - |
+| META_CONVERSIONS_ACCESS_TOKEN | Dedicated server-side Conversions API token | - |
+| API_PUBLIC_URL | Public API URL including `/api` | - |
+| INTEGRATION_ENCRYPTION_KEY | 32-byte integration encryption key | - |
+| OAUTH_STATE_SECRET | OAuth callback state signing secret | - |
+| CRM_LEAD_RETENTION_DAYS | Lead retention review period in days | - |
+| VITE_API_URL | Frontend API base URL | /api |

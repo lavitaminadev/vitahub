@@ -38,11 +38,17 @@ export class DetectStalePiecesJob {
       piece.staleAlertedAt = new Date();
       await this.pieceRepo.save(piece);
 
+      if (!piece.assignedTo) {
+        this.logger.warn(`Stale piece without assignee: ${piece.id} - ${piece.title}`);
+        continue;
+      }
+
       const notif = this.notifRepo.create({
-        userId: piece.assignedTo ?? '',
+        userId: piece.assignedTo,
+        organizationId: piece.organizationId,
         type: 'piece.stale',
         title: 'Pieza estancada',
-        message: `La pieza "${piece.title}" lleva más de ${STALE_HOURS}h en estado "${piece.status}".`,
+        message: `La pieza "${piece.title}" lleva mas de ${STALE_HOURS}h en estado "${piece.status}".`,
         data: { pieceId: piece.id, status: piece.status, hoursStale: STALE_HOURS },
       });
       await this.notifRepo.save(notif);

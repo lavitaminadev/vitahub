@@ -14,6 +14,6 @@ import { TenantSubscriber } from './tenant.filter';
 })
 export class TenancyModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TenantMiddleware).forRoutes('*');
+    consumer.apply(TenantMiddleware).forRoutes('{*splat}');
   }
 }

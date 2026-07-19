@@ -1,12 +1,29 @@
-interface CardProps {
+/**
+ * @fileoverview Metric card used in dashboards.
+ */
+
+import { memo, type JSX } from 'react';
+
+/**
+ * Props for the metric card component.
+ */
+export interface CardProps {
+  /** Card title. */
   title: string;
+  /** Main numeric or textual value. */
   value: string | number;
+  /** Optional supporting text below the value. */
   subtitle?: string;
+  /** Optional color override for the value. */
   color?: string;
+  /** Optional emoji icon. */
   icon?: string;
 }
 
-export function Card({ title, value, subtitle, color = '#1a1a2e', icon }: CardProps) {
+/**
+ * Renders a single metric card.
+ */
+export const Card = memo(function Card({ title, value, subtitle, color = '#1a1a2e', icon }: CardProps): JSX.Element {
   return (
     <div className="card">
       <div className="card-header">
@@ -17,4 +34,4 @@ export function Card({ title, value, subtitle, color = '#1a1a2e', icon }: CardPr
       {subtitle && <div className="card-subtitle">{subtitle}</div>}
     </div>
   );
-}
+});

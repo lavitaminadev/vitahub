@@ -1,156 +1,110 @@
 # Arquitectura de VITAHUB
 
-## Visión General
+## Proposito real
 
-VITAHUB es un sistema de gestión de agencia digital diseñado para agencias chilenas. Proporciona una plataforma integral para administrar clientes, producción, presupuestos, gamificación, reuniones, contenido y facturación.
+VITAHUB no se esta modelando como un SaaS abierto para multiples agencias. En el estado actual del proyecto esta orientado a **La Vitamina** como sistema operativo interno para gestionar:
 
-## Estructura del Proyecto
+- cuentas y empresas cliente
+- captacion comercial y CRM
+- produccion y aprobaciones
+- operaciones, reuniones, onboarding y facturacion
 
-```
-hubvit/
-├── apps/
-│   ├── api/              # Backend NestJS + TypeORM + MySQL
-│   │   ├── src/
-│   │   │   ├── core/          # Módulos transversales (auth, tenancy, audit, etc.)
-│   │   │   ├── modules/       # Módulos de dominio (organizations, users, clients, etc.)
-│   │   │   ├── infrastructure/# Migraciones y configuración de BD
-│   │   │   ├── config/        # Configuración global
-│   │   │   ├── shared/        # Utilidades compartidas
-│   │   │   ├── app.module.ts  # Módulo raíz
-│   │   │   └── main.ts        # Punto de entrada
-│   │   ├── prisma/
-│   │   └── test/
-│   └── web/               # Frontend (a definir)
-├── packages/
-│   ├── contracts/         # Tipos compartidos entre API y Web
-│   ├── shared-types/      # Definiciones de tipos comunes
-│   ├── ui/                # Componentes UI compartidos
-│   └── validation/        # Esquemas de validación (Zod)
-├── infrastructure/       # Docker, despliegue, cron jobs
-├── database/             # Seeds y scripts de BD
-├── docs/                 # Documentación
-├── scripts/              # Scripts de automatización
-└── tests/                # Tests E2E
+La separacion por `organization_id` sigue existiendo a nivel tecnico para mantener aislamiento de datos y orden operacional, pero el diseño funcional debe responder al flujo interno de La Vitamina.
+
+## Estructura
+
+```text
+apps/
+  api/   NestJS + TypeORM + MySQL
+  web/   React + React Query + rutas protegidas por sesion y rol
+packages/
+  shared/ tipos compartidos entre API y frontend
+docs/
+  arquitectura, base de datos, roadmap CRM/Meta
 ```
 
-## Módulos Core
+## Capas principales
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Auth** | Autenticación JWT con refresh tokens, registro y login |
-| **Tenancy** | Multi-tenancy por organización (aislamiento de datos) |
-| **Audit** | Trazabilidad de cambios en entidades |
-| **Health** | Endpoints de health check (BD, memoria, disco, Redis) |
-| **Errors** | Manejo centralizado de excepciones |
-| **Observability** | Logging, métricas y monitoreo |
-| **Events** | Arquitectura basada en eventos (EventEmitter) |
-| **Jobs** | Tareas programadas (cron jobs) |
-| **Notifications** | Notificaciones internas por usuario |
-| **Parameters** | Sistema de parámetros configurables por scope |
+### API
 
-## Módulos de Dominio (Capacidades)
+- `core/`
+  - auth JWT
+  - autorizacion por roles
+  - proteccion de datos
+  - jobs programados
+  - observabilidad y errores
+- `modules/`
+  - `users`, `clients`, `crm`, `integrations`, `production`, `billing`, `meetings`, `onboarding`, `documents`, etc.
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Organizations** | Gestión de organizaciones (agencias) |
-| **Users** | Gestión de usuarios de la agencia |
-| **CRM** | Leads, contactos, oportunidades, pipeline |
-| **Clients** | Gestión de clientes |
-| **Contracts** | Contratos con clientes |
-| **Catalog** | Catálogo de servicios |
-| **Production** | Piezas, versiones, correcciones, flujo de producción |
-| **Design Budget** | Presupuesto de UDs (unidades de diseño) mensual |
-| **Gamification** | Gamificación con XP semanal, tiers y ranking |
-| **Content** | Parrillas de contenido semanal |
-| **Meetings** | Reuniones, asistentes y action items |
-| **Integrations** | Integraciones con Meta, Google, Drive, Gmail |
-| **Billing** | Cotizaciones, facturas, pagos |
-| **Approvals** | Flujo de aprobaciones |
-| **Briefs** | Briefs creativos |
-| **Documents** | Gestión documental |
-| **Uploads** | Subida de archivos |
-| **Onboarding** | Flujo de onboarding de clientes |
-| **Reports** | Reportes y dashboard ejecutivo |
-| **Dashboards** | Dashboards operativos (overview, producción, financiero) |
-| **Knowledge** | Base de conocimiento |
+### Web
 
-## Estructura de cada Módulo
+- `core/`
+  - auth store
+  - router
+  - `ProtectedRoute`
+  - registro de navegacion por feature manifest
+- `features/`
+  - pantallas operativas y comerciales
+- `shared/`
+  - tabla, modal, badges, loading, empty states
 
-Cada módulo de dominio sigue una arquitectura de casos de uso (use cases):
+## Reglas operativas vigentes
 
-```
-module/
-├── *.controller.ts       # Controlador REST
-├── *.module.ts            # Módulo NestJS
-├── *.entity.ts            # Entidad TypeORM
-├── *.service.ts           # Servicio (opcional)
-├── *.use-case.ts          # Casos de uso
-├── *.enum.ts              # Enumeraciones
-└── dto/                   # DTOs de validación
-```
+### Autorizacion
 
-## Base de Datos
+- Toda ruta interna requiere sesion.
+- Las vistas sensibles se bloquean por rol usando los mismos manifests que definen navegacion.
+- `users`, `crm/leads`, `integrations`, `billing`, `operations`, `direction` y `settings` respetan rol explicito.
 
-Ver `docs/DATABASE.md` para el detalle completo.
+### Gestion de usuarios
 
-## Multi-tenancy
+- El admin u operaciones crea cuentas dentro de su propia organizacion.
+- Ya no se permite inyectar libremente `organizationId` desde la pantalla de usuarios.
+- Las cuentas portal cliente pueden vincularse a una empresa especifica mediante `clientId`.
+- La modificacion de rol, activacion y asignacion de empresa queda centralizada en gestion de usuarios.
 
-VITAHUB implementa multi-tenancy a nivel de organización mediante:
+### CRM comercial
 
-1. **Middleware `TenancyMiddleware`**: Extrae `organizationId` del header `x-organization-id` o del JWT
-2. **Filtro de entidad `BaseEntity`**: Toda entidad tenant-aware incluye `organization_id`
-3. **Contexto async local (`AsyncLocalStorage`)**: Propaga el tenant en toda la request
-4. **Guard `TenantGuard`**: Verifica que las operaciones respeten el aislamiento
+Flujo vigente:
 
-```
-Request → TenancyMiddleware → AuthGuard → Controller → Service → Repository (filtrado por org)
-```
+1. Meta genera `leadgen`.
+2. Webhook entra a API.
+3. Se guarda evento tecnico RAW.
+4. Se descarga el detalle real con `leadgen_id`.
+5. El lead se normaliza y deduplica.
+6. Se calcula score y `fitStatus`.
+7. Si califica:
+   - se registra interaccion de ingreso
+   - se asigna responsable comercial si existe
+   - se crea contacto CRM
+   - se crea oportunidad CRM
+8. Si no califica:
+   - se descarta con motivo
+   - se registra interaccion de descarte
 
-## Flujo de Autenticación
+### ACID y consistencia
 
-```
-┌─────────┐     POST /auth/login     ┌──────────┐
-│         │ ────────────────────────→ │          │
-│ Cliente │     { email, password }   │   API    │
-│         │ ←──────────────────────── │          │
-└─────────┘     { accessToken,        └──────────┘
-                 refreshToken,
-                 user }
+- La captura de leads corre dentro de una transaccion TypeORM.
+- La persistencia del lead y la automatizacion comercial minima se ejecutan en el mismo ciclo transaccional.
+- La normalizacion de `User` y `Lead` se refuerza con hooks de entidad (`BeforeInsert` y `BeforeUpdate`).
 
-1. POST /auth/login → valida credentials → genera JWT (7d exp) + refresh token
-2. POST /auth/refresh → refresh token → nuevo access token
-3. GET /auth/me → datos del usuario autenticado
-4. POST /auth/register → crea usuario y organización (opcional)
-```
+## Seguridad y cumplimiento
 
-## Arquitectura de Eventos
+- Passwords con `bcrypt`.
+- Scope por organizacion en usuarios, clientes y CRM.
+- Exportacion y anonimización de leads desde `data-protection`.
+- Job de retencion para anonimizar leads descartados vencidos.
+- No se deben exponer vistas no autorizadas ni permitir cambio de organizacion desde cliente web.
 
-VITAHUB usa `@nestjs/event-emitter` para desacoplar procesos:
+## Integracion Meta
 
-```
-PieceAssigned ─────→ PieceAssignedHandler → Notificación ─────→ Usuario asignado
-PieceDelivered ───→ PieceDeliveredHandler → XP Event ────────→ Gamificación
-                                            UD Consumption ──→ Design Budget
-LeadConverted ────→ LeadConvertedHandler → Onboarding ──────→ Cliente
-```
+Estado implementado:
 
-## Diagrama de Capas
+- OAuth Meta
+- seleccion de activos
+- health de conexion
+- webhook `leadgen`
+- sync manual real por `pageId` + `leadgenId`
+- base para revision de Meta App Review
 
-```
-┌──────────────────────────────────────────────────────────────┐
-│                    Controllers (REST API)                     │
-│         @Controller, @Get, @Post, @UseGuards, etc.           │
-├──────────────────────────────────────────────────────────────┤
-│                    Use Cases / Services                       │
-│               Lógica de negocio y orquestación               │
-├──────────────────────────────────────────────────────────────┤
-│                     TypeORM Repositories                      │
-│                         @InjectRepository                     │
-├──────────────────────────────────────────────────────────────┤
-│                    MySQL 8 Database                           │
-│                    + Redis (caché/sesión)                     │
-├──────────────────────────────────────────────────────────────┤
-│              Cross-cutting (Core Modules)                     │
-│  Auth | Tenancy | Audit | Health | Events | Observability    │
-└──────────────────────────────────────────────────────────────┘
-```
+Documento complementario: `docs/crm-meta-roadmap.md`.

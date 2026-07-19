@@ -4,13 +4,20 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../../modules/users/user.entity';
+import { UserRole } from '../../modules/organizations/user-role.enum';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'vitahub_jwt_secret_change_in_prod';
 
+/**
+ * Passport JWT strategy for NestJS.
+ *
+ * Validates the bearer token, loads the user from the database, and attaches a
+ * sanitized user object to the request.
+ */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    @InjectRepository(User) private userRepo: Repository<User>,
+    @InjectRepository(User) private readonly userRepo: Repository<User>,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -19,7 +26,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub: string; email: string; organizationId: string; role: string }) {
+  /**
+   * Validates a decoded JWT payload and returns the authenticated user shape.
+   *
+   * @param payload - Decoded JWT payload.
+   * @returns Sanitized user object attached to `req.user`.
+   * @throws UnauthorizedException when the user is not found or inactive.
+   */
+  async validate(payload: { sub: string; email: string; organizationId: string; role: UserRole; clientId?: string }) {
     const user = await this.userRepo.findOne({ where: { id: payload.sub, isActive: true } });
     if (!user) throw new UnauthorizedException();
     return {
@@ -27,6 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       email: user.email,
       role: user.role,
       organizationId: user.organizationId,
+      clientId: user.clientId,
       name: user.name,
       tenantId: user.organizationId,
     };

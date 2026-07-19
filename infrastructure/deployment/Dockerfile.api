@@ -1,14 +1,24 @@
 FROM node:20.20.2-alpine AS builder
 WORKDIR /app
-COPY apps/api/package*.json ./
-RUN npm ci
-COPY apps/api/ .
-RUN npm run build
+
+COPY package.json ./
+COPY apps/api/package.json apps/api/
+COPY apps/web/package.json apps/web/
+COPY packages/shared/package.json packages/shared/
+
+RUN rm -f package-lock.json && npm install --install-links
+
+COPY packages/shared/ packages/shared/
+RUN cd packages/shared && npx tsc
+
+COPY apps/api/ apps/api/
+RUN cd apps/api && npx tsc
 
 FROM node:20.20.2-alpine AS runner
 WORKDIR /app
 RUN addgroup --system --gid 1001 nodejs && adduser --system --uid 1001 nestjs
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/apps/api/dist ./dist
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY apps/api/package.json ./
 USER nestjs

@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../core/api';
 import { StatusBadge } from '../../shared/StatusBadge';
 import { LoadingSpinner } from '../../shared/LoadingSpinner';
+import { EmptyState } from '../../shared/EmptyState';
 
 interface ApprovalItem {
   id: string;
@@ -34,11 +35,19 @@ export function ApprovalsPage() {
   if (isLoading) return <LoadingSpinner text="Cargando aprobaciones..." />;
   if (error) return <div className="alert alert-error">Error al cargar aprobaciones</div>;
 
+  const pendingApprovals = (approvals ?? []).filter((approval) => approval.status === 'pending');
+
   return (
     <div className="page">
-      <h1>Aprobaciones Pendientes</h1>
-      {(approvals?.length ?? 0) === 0 ? (
-        <div className="alert alert-info">No hay aprobaciones pendientes</div>
+      <h1>Aprobaciones pendientes</h1>
+      <p className="page-subtitle">Gestiona revisiones, abre la pieza final y resuelve el ciclo de feedback sin salir del flujo.</p>
+
+      {pendingApprovals.length === 0 ? (
+        <EmptyState
+          icon="OK"
+          title="Nada pendiente"
+          description="Todas las aprobaciones activas ya fueron resueltas."
+        />
       ) : (
         <div className="table-wrapper">
           <table className="data-table">
@@ -53,24 +62,35 @@ export function ApprovalsPage() {
               </tr>
             </thead>
             <tbody>
-              {approvals?.map((a) => (
-                <tr key={a.id}>
-                  <td>{a.pieceTitle}</td>
-                  <td>{a.clientName}</td>
-                  <td>{a.requestedBy}</td>
-                  <td><StatusBadge status={a.status} /></td>
-                  <td>{new Date(a.createdAt).toLocaleDateString()}</td>
+              {pendingApprovals.map((approval) => (
+                <tr key={approval.id}>
+                  <td>{approval.pieceTitle}</td>
+                  <td>{approval.clientName}</td>
+                  <td>{approval.requestedBy}</td>
+                  <td><StatusBadge status={approval.status} /></td>
+                  <td>{new Date(approval.createdAt).toLocaleDateString()}</td>
                   <td className="actions-cell">
-                    {a.status === 'pending' && (
-                      <>
-                        <button className="btn btn-sm btn-primary" onClick={() => approveMutation.mutate(a.id)} disabled={approveMutation.isPending}>
-                          Aprobar
-                        </button>
-                        <button className="btn btn-sm btn-outline" onClick={() => rejectMutation.mutate(a.id)} disabled={rejectMutation.isPending}>
-                          Rechazar
-                        </button>
-                      </>
+                    {approval.versionUrl && (
+                      <a className="btn btn-sm btn-outline" href={approval.versionUrl} target="_blank" rel="noreferrer">
+                        Ver pieza
+                      </a>
                     )}
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => approveMutation.mutate(approval.id)}
+                      disabled={approveMutation.isPending}
+                    >
+                      {approveMutation.isPending ? 'Aprobando...' : 'Aprobar'}
+                    </button>
+                    <button
+                      className="btn btn-sm btn-outline btn-danger"
+                      onClick={() => {
+                        if (window.confirm('¿Rechazar esta aprobación?')) rejectMutation.mutate(approval.id);
+                      }}
+                      disabled={rejectMutation.isPending}
+                    >
+                      {rejectMutation.isPending ? 'Rechazando...' : 'Rechazar'}
+                    </button>
                   </td>
                 </tr>
               ))}

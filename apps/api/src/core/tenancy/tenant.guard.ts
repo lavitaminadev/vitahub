@@ -1,20 +1,34 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import type { AuthenticatedRequest } from '../../shared/types/request';
+import { Reflector } from '@nestjs/core';
+import { SKIP_TENANCY_KEY } from './skip-tenancy.decorator';
+import { IS_PUBLIC_KEY } from '../auth/decorators/public.decorator';
 
-const SUPER_ADMIN_ROLES = ['super_admin', 'admin'];
-
+/**
+ * Guard that ensures a user can only access resources belonging to their
+ * tenant (organization). Cross-tenant endpoints must opt out explicitly.
+ */
 @Injectable()
 export class TenantGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
+
   canActivate(context: ExecutionContext): boolean {
-    const req = context.switchToHttp().getRequest();
-    const user = (req as any).user;
-    const orgId = (req as any).organizationId;
+    const skipsTenancy = this.reflector.getAllAndOverride<boolean>(SKIP_TENANCY_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (skipsTenancy || isPublic) return true;
+
+    const req = context.switchToHttp().getRequest<AuthenticatedRequest>();
+    const { user } = req;
+    const orgId = req.organizationId;
 
     if (!user) {
       throw new ForbiddenException('Authentication required');
-    }
-
-    if (SUPER_ADMIN_ROLES.includes(user.role)) {
-      return true;
     }
 
     const effectiveOrgId = orgId || user.organizationId;

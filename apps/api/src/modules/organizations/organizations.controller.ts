@@ -3,34 +3,55 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateOrganizationUseCase } from './create-organization.use-case';
 import { ListOrganizationsUseCase } from './list-organizations.use-case';
+import { CreateOrganizationDto } from './dto/create-organization.dto';
+import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { Roles } from '../../core/authorization/roles.decorator';
+import { UserRole } from './user-role.enum';
+import type { AuthenticatedRequest } from '../../shared/types/request';
 
+/**
+ * Organization management endpoints.
+ */
 @ApiTags('Organizaciones')
 @Controller('organizations')
 export class OrganizationsController {
   constructor(
-    private createOrg: CreateOrganizationUseCase,
-    private listOrgs: ListOrganizationsUseCase,
+    private readonly createOrg: CreateOrganizationUseCase,
+    private readonly listOrgs: ListOrganizationsUseCase,
   ) {}
 
+  /**
+   * Creates a new organization. Restricted to admins.
+   */
   @Post()
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Crear una organización' })
-  create(@Body() dto: { name: string; code: string; currency?: string }) {
+  create(@Body() dto: CreateOrganizationDto) {
     return this.createOrg.execute(dto);
   }
 
+  /**
+   * Lists all organizations.
+   */
   @Get()
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Listar organizaciones' })
-  list() {
-    return this.listOrgs.execute();
+  list(@Req() req: AuthenticatedRequest) {
+    const organizationId = req.user.role === UserRole.ADMIN ? undefined : (req.organizationId || req.user.organizationId);
+    return this.listOrgs.execute(organizationId);
   }
 
+  /**
+   * Updates the current user's organization profile.
+   */
   @Put('profile')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
+  @Roles(UserRole.ADMIN, UserRole.COMMERCIAL_DIRECTOR, UserRole.OPERATIONS_DIRECTOR)
   @ApiOperation({ summary: 'Actualizar perfil de la organización' })
-  updateProfile(@Req() req: any, @Body() dto: { name?: string; currency?: string }) {
-    return this.createOrg.executeUpdate(req.organizationId, dto);
+  updateProfile(@Req() req: AuthenticatedRequest, @Body() dto: UpdateOrganizationDto) {
+    const organizationId = req.organizationId || req.user.organizationId;
+    return this.createOrg.executeUpdate(organizationId, dto);
   }
 }

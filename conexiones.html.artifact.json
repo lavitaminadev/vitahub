@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "kind": "html",
+  "title": "conexiones.html",
+  "entry": "conexiones.html",
+  "renderer": "html",
+  "status": "complete",
+  "exports": [
+    "html",
+    "pdf",
+    "zip"
+  ],
+  "createdAt": "2026-07-16T01:49:17.043Z",
+  "updatedAt": "2026-07-16T01:49:17.043Z",
+  "metadata": {
+    "inferred": true,
+    "reconciled": true
+  }
+}

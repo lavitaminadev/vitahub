@@ -1,0 +1,11 @@
+{
+  "kind": "critique-panel",
+  "score": 4.9,
+  "axes": {
+    "clarity": { "score": 5, "notes": "Navegación completa entre landing, dashboard, producción, CRM y conexiones; estructura de app coherente." },
+    "hierarchy": { "score": 5, "notes": "Cada pantalla tiene un foco claro y se mantiene la jerarquía visual entre módulos." },
+    "typography": { "score": 5, "notes": "Tipografía y escala consistentes en todas las pantallas, numeros tabulares en tablas y KPIs." },
+    "motion": { "score": 4, "notes": "Estados hover, focus y feedback presentes; transiciones contenidas y funcionales." },
+    "brand": { "score": 5, "notes": "Sistema visual VITAHUB unificado con dirección modern-minimal; documentado en design-system.md." }
+  }
+}

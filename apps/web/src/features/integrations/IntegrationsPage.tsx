@@ -1,16 +1,26 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../core/api';
 import { StatusBadge } from '../../shared/StatusBadge';
 import { LoadingSpinner } from '../../shared/LoadingSpinner';
+import { MetaConnectCard } from './MetaConnectCard';
+import { GoogleConnectCard } from './GoogleConnectCard';
 
 interface Integration {
   id: string;
   name: string;
   provider: string;
   status: string;
-  lastSync: string;
+  lastSyncAt?: string;
   config: Record<string, unknown>;
+  health?: string;
 }
+
+const PROVIDER_ICONS: Record<string, string> = {
+  google: 'G',
+  slack: 'S',
+  notion: 'N',
+  meta: 'M',
+};
 
 export function IntegrationsPage() {
   const queryClient = useQueryClient();
@@ -28,37 +38,62 @@ export function IntegrationsPage() {
   if (isLoading) return <LoadingSpinner text="Cargando integraciones..." />;
   if (error) return <div className="alert alert-error">Error al cargar integraciones</div>;
 
+  const metaIntegration = integrations?.find((item) => item.provider === 'meta');
+  const googleIntegration = integrations?.find((item) => item.provider === 'google');
+  const otherIntegrations = integrations?.filter((item) => item.provider !== 'meta' && item.provider !== 'google');
+
   return (
     <div className="page">
       <h1>Integraciones</h1>
-      {(integrations?.length ?? 0) === 0 ? (
-        <div className="alert alert-info">No hay integraciones configuradas</div>
-      ) : (
-        <div className="integration-list">
-          {integrations?.map((intg) => (
-            <div key={intg.id} className="integration-card">
-              <div className="integration-header">
-                <span className="integration-icon">
-                  {intg.provider === 'google' ? '🔴' : intg.provider === 'slack' ? '💬' : intg.provider === 'notion' ? '📘' : '🔗'}
-                </span>
-                <div className="integration-info">
-                  <div className="integration-name">{intg.name}</div>
-                  <div className="integration-provider">{intg.provider}</div>
+      <p className="page-subtitle">
+        Conecta proveedores, descubre activos reales, revisa salud y deja cada flujo operativo sin pasos sueltos.
+      </p>
+
+      <h2>Meta (Facebook/Instagram)</h2>
+      <MetaConnectCard integration={metaIntegration} />
+
+      <h2>Google</h2>
+      <GoogleConnectCard integration={googleIntegration} />
+
+      {(otherIntegrations?.length ?? 0) > 0 && (
+        <>
+          <h2>Otras integraciones</h2>
+          <div className="integration-list">
+            {otherIntegrations?.map((integration) => (
+              <div key={integration.id} className="integration-card">
+                <div className="integration-header">
+                  <span className="integration-icon">{PROVIDER_ICONS[integration.provider] || '?'}</span>
+                  <div className="integration-info">
+                    <div className="integration-name">{integration.name}</div>
+                    <div className="integration-provider">{integration.provider}</div>
+                  </div>
+                  <StatusBadge status={integration.status} />
                 </div>
-                <StatusBadge status={intg.status} />
+
+                <div className="integration-meta">
+                  Última sincronización:{' '}
+                  {integration.lastSyncAt ? new Date(integration.lastSyncAt).toLocaleString() : 'Nunca'}
+                </div>
+
+                <button
+                  className={`btn btn-sm ${integration.status === 'active' ? 'btn-outline' : 'btn-primary'}`}
+                  onClick={() =>
+                    toggleMutation.mutate({
+                      id: integration.id,
+                      status: integration.status === 'active' ? 'disabled' : 'active',
+                    })
+                  }
+                >
+                  {integration.status === 'active' ? 'Desactivar' : 'Activar'}
+                </button>
               </div>
-              <div className="integration-meta">
-                Última sincronización: {intg.lastSync ? new Date(intg.lastSync).toLocaleString() : 'Nunca'}
-              </div>
-              <button
-                className={`btn btn-sm ${intg.status === 'active' ? 'btn-outline' : 'btn-primary'}`}
-                onClick={() => toggleMutation.mutate({ id: intg.id, status: intg.status === 'active' ? 'inactive' : 'active' })}
-              >
-                {intg.status === 'active' ? 'Desactivar' : 'Activar'}
-              </button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {(otherIntegrations?.length ?? 0) === 0 && !metaIntegration && !googleIntegration && (
+        <div className="alert alert-info">No hay integraciones configuradas todavía.</div>
       )}
     </div>
   );

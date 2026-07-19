@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { HttpModule } from "@nestjs/axios";
+import { KnowledgeController } from "./knowledge.controller";
 import { RagService } from "./rag.service";
 import { KnowledgeStore } from "./knowledge.store";
 import { ChunkerService } from "./chunker.service";
@@ -10,6 +11,7 @@ import { EmbeddingsService } from "./embeddings.service";
 
 @Module({
   imports: [HttpModule],
+  controllers: [KnowledgeController],
   providers: [
     RagService,
     KnowledgeStore,

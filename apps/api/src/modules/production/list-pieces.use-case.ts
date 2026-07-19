@@ -15,6 +15,26 @@ export class ListPiecesUseCase {
     if (status) where.status = status;
     if (clientId) where.clientId = clientId;
     if (assignedTo) where.assignedTo = assignedTo;
-    return this.repo.find({ where, order: { createdAt: 'DESC' }, relations: ['client'] });
+
+    const pieces = await this.repo.find({
+      where,
+      order: { createdAt: 'DESC' },
+      relations: ['client'],
+    });
+
+    return pieces.map((piece) => ({
+      id: piece.id,
+      title: piece.title,
+      type: piece.type,
+      status: piece.status,
+      udAmount: Number(piece.udAmount ?? 0),
+      correctionCount: piece.correctionCount,
+      clientCorrectionCount: piece.clientCorrectionCount,
+      chargeNoteRequired: piece.clientCorrectionCount > 3,
+      clientName: piece.client?.name || 'Sin cliente',
+      assignedTo: piece.assignedTo,
+      dueDate: piece.deadlineAt?.toISOString(),
+      difficultyLevel: piece.difficultyLevel,
+    }));
   }
 }
