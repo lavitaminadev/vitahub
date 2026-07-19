@@ -16,10 +16,12 @@ export class SupabaseService implements OnModuleInit {
       return;
     }
 
-    this.client = createClient(url, anonKey);
-    this.adminClient = createClient(url, serviceRoleKey, {
+    const options = {
       auth: { autoRefreshToken: false, persistSession: false },
-    });
+      realtime: { channels: [] },
+    };
+    this.client = createClient(url, anonKey, options);
+    this.adminClient = createClient(url, serviceRoleKey, options);
   }
 
   getClient(): SupabaseClient {
