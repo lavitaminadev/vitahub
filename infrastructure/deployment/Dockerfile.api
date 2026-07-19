@@ -21,6 +21,7 @@ COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY apps/api/package.json ./
+RUN mkdir -p /app/uploads && chown -R nestjs:nodejs /app
 USER nestjs
 EXPOSE 3000
 ENV NODE_ENV=production
