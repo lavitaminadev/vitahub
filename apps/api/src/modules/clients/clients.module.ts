@@ -10,5 +10,6 @@ import { GetClientUseCase } from './get-client.use-case';
   imports: [TypeOrmModule.forFeature([Client])],
   controllers: [ClientsController],
   providers: [CreateClientUseCase, ListClientsUseCase, GetClientUseCase],
+  exports: [TypeOrmModule.forFeature([Client])],
 })
 export class ClientsModule {}
