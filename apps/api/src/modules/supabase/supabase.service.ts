@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
 
 @Injectable()
 export class SupabaseService {
@@ -12,7 +13,7 @@ export class SupabaseService {
       const url = process.env.SUPABASE_URL;
       const anonKey = process.env.SUPABASE_ANON_KEY;
       if (!url || !anonKey) throw new Error('Supabase credentials missing');
-      this.client = createClient(url, anonKey, { auth: { autoRefreshToken: false, persistSession: false } });
+      this.client = createClient(url, anonKey, { auth: { autoRefreshToken: false, persistSession: false }, realtime: { transport: WebSocket } });
     }
     return this.client;
   }
@@ -22,7 +23,7 @@ export class SupabaseService {
       const url = process.env.SUPABASE_URL;
       const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       if (!url || !serviceRoleKey) throw new Error('Supabase admin credentials missing');
-      this.adminClient = createClient(url, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } });
+      this.adminClient = createClient(url, serviceRoleKey, { auth: { autoRefreshToken: false, persistSession: false }, realtime: { transport: WebSocket } });
     }
     return this.adminClient;
   }
