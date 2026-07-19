@@ -1,19 +1,20 @@
 import { Controller, Post, Body, HttpCode, HttpStatus, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 import { AuthService } from '../../core/auth/auth.service';
 import { SupabaseService } from './supabase.service';
 import { Public } from '../../core/auth/decorators/public.decorator';
 
 class SupabaseRegisterDto {
-  email: string;
-  password: string;
-  name: string;
+  @IsEmail() email: string;
+  @IsString() @MinLength(6) password: string;
+  @IsString() @MinLength(2) name: string;
 }
 
 class SupabaseLoginDto {
-  email: string;
-  password: string;
+  @IsEmail() email: string;
+  @IsString() @MinLength(6) password: string;
 }
 
 @ApiTags('Supabase Auth')
